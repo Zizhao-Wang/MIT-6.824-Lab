@@ -57,7 +57,6 @@ func doMap(
 	//
 	// Your code here (Part I).
 
-	var ArrayKV []KeyValue
 	/*
 	 * File variables declaration
 	 * open files and close!
@@ -80,8 +79,28 @@ func doMap(
 	/*
 	 *call map function.
 	 */
-	ArrayKV = mapF(inFile, wr.String())
-
+	ArrayKV := mapF(inFile, wr.String())
+	nkv := len(ArrayKV) / nReduce
+	j := 1
+	var FileTmp *os.File
+	for i := 0; i < len(ArrayKV); i++ {
+		if i+1 == nkv || i == 0 {
+			if FileTmp != nil {
+				FileTmp.Close()
+			}
+			FileTmp, err = os.Create("../TmpData/mrtmp." + jobName + "-" + string(mapTask) + "-" + string(j))
+			if err != nil {
+				log.Fatal(err)
+			}
+			nkv += nkv
+			j += 1
+		}
+		FileTmp.WriteString(ArrayKV[i].Key + " ")
+		FileTmp.WriteString(ArrayKV[i].Value + "\n")
+	}
+	if FileTmp != nil {
+		FileTmp.Close()
+	}
 }
 
 func ihash(s string) int {
