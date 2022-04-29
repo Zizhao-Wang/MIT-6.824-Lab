@@ -1,12 +1,16 @@
 package mapreduce
 
 import (
+	"bufio"
+	"bytes"
 	"hash/fnv"
+	"log"
+	"os"
 )
 
 func doMap(
 	jobName string, // the name of the MapReduce job
-	mapTask int, // which map task this is
+	mapTask int,    // which map task this is
 	inFile string,
 	nReduce int, // the number of reduce task that will be run ("R" in the paper)
 	mapF func(filename string, contents string) []KeyValue,
@@ -52,7 +56,32 @@ func doMap(
 	// Remember to close the file after you have written all the values!
 	//
 	// Your code here (Part I).
-	//
+
+	var ArrayKV []KeyValue
+	/*
+	 * File variables declaration
+	 * open files and close!
+	 */
+	var file, err = os.Open(inFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	/*
+	 * Read data from files into a string.
+	 */
+	wr := bytes.Buffer{}
+	sc := bufio.NewScanner(file)
+	for sc.Scan() {
+		wr.WriteString(sc.Text())
+	}
+
+	/*
+	 *call map function.
+	 */
+	ArrayKV = mapF(inFile, wr.String())
+
 }
 
 func ihash(s string) int {
